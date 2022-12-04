@@ -2,11 +2,11 @@ import functools
 from common import data
 
 sacks = data(3, sep="\n")
-sacks_with_compartments = []
-for sack in sacks:
-    sacks_with_compartments.append((sack[: len(sack) // 2], sack[len(sack) // 2 :]))
+sacks_with_compartments: list[tuple[str, str]] = []
+for s in sacks:
+    sacks_with_compartments.append((s[: len(s) // 2], s[len(s) // 2 :]))
 
-overlapping_items = []
+overlapping_items: list[str] = []
 for sack in sacks_with_compartments:
     overlapping_items.append(set(sack[0]).intersection(set(sack[1])).pop())
 
