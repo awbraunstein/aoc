@@ -32,7 +32,7 @@ def data(day: int) -> str:
 
 
 @overload
-def data(day: int, sep: str) -> str:
+def data(day: int, sep: str) -> list[str]:
     ...
 
 
