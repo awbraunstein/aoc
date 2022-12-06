@@ -1,5 +1,4 @@
 from common import data
-from collections import Counter
 
 signal = data(6)[0]
 
