@@ -5,21 +5,11 @@ signal = data(6)[0]
 
 
 def unique_window(signal: str, window_size: int) -> int:
-    window: Counter[str] = Counter()
-    for i in range(window_size):
-        window[signal[i]] += 1
-    idx = window_size
-    while idx < len(signal):
-        if len(window) == window_size:
-            return idx
-        to_remove = signal[idx - window_size]
-        window[to_remove] -= 1
-        if window[to_remove] == 0:
-            del window[to_remove]
-        window[signal[idx]] += 1
-        idx += 1
+    for i in range(len(signal) - window_size):
+        if len(set(signal[i : i + window_size])) == window_size:
+            return i + window_size
 
-    raise Exception()
+    raise Exception
 
 
 def part1(signal: str) -> int:
