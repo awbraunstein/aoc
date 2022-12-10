@@ -1,4 +1,4 @@
-from common import data, rest
+from common import data
 
 instructions = [
     (direction, int(steps))
