@@ -1,5 +1,5 @@
 from common import data
-import heapq
+from collections import deque
 
 height_map_strings = data(12, sep="\n", parser=list)
 
@@ -20,12 +20,8 @@ for r, row in enumerate(height_map_strings):
         height_map[r].append(val)
 
 
-def manhattan_distance(a: tuple[int, int], b: tuple[int, int]):
-    return abs(a[0] - b[0]) + abs(a[1] - b[1])
-
-
-def a_star(
-    graph: list[list[int]], start: tuple[int, int], goal: tuple[int, int]
+def search(
+    graph: list[list[int]], starts: list[tuple[int, int]], goal: tuple[int, int]
 ) -> list[tuple[int, int]] | None:
     def get_neighbors(
         graph: list[list[int]], current: tuple[int, int]
@@ -50,33 +46,25 @@ def a_star(
             total_path.append(current)
         return list(reversed(total_path))
 
-    open_set: list[tuple[int, tuple[int, int]]] = []
+    queue = deque(starts)
+    seen: set[tuple[int, int]] = set(starts)
     came_from: dict[tuple[int, int], tuple[int, int]] = {}
-    g_score = {start: 0}
-    f_score = {start: manhattan_distance(start, goal)}
-    heapq.heappush(open_set, (f_score[start], start))
-
-    while open_set:
-        _, current = heapq.heappop(open_set)
+    while queue:
+        current = queue.popleft()
         if current == goal:
             return reconstruct_path(came_from, current)
-
-        for neighbor in get_neighbors(graph, current):
-            tentative_g_score = g_score[current] + graph[neighbor[0]][neighbor[1]]
-            if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+        neighbors = get_neighbors(graph, current)
+        for neighbor in neighbors:
+            if neighbor not in seen:
+                seen.add(neighbor)
                 came_from[neighbor] = current
-                g_score[neighbor] = tentative_g_score
-                f_score[neighbor] = tentative_g_score + manhattan_distance(
-                    neighbor, goal
-                )
-                if neighbor not in open_set:
-                    heapq.heappush(open_set, (f_score[neighbor], neighbor))
+                queue.append(neighbor)
 
     return None
 
 
 def part1() -> int:
-    path = a_star(height_map, start, end)
+    path = search(height_map, [start], end)
     assert path is not None
     return len(path) - 1
 
@@ -87,9 +75,9 @@ def part2() -> int:
         for c, v in enumerate(row):
             if v == ord("a"):
                 starts.append((r, c))
-
-    paths = [a_star(height_map, start, end) for start in starts]
-    return min(len(path) - 1 for path in paths if path is not None)
+    path = search(height_map, starts, end)
+    assert path is not None
+    return len(path) - 1
 
 
 print(part1())
