@@ -40,12 +40,13 @@ def part1():
         while True:
             if sand.y > max_row:
                 return sand_count
-            if sand + down not in board:
-                sand += down
-            elif sand + down_left not in board:
-                sand += down_left
-            elif sand + down_right not in board:
-                sand += down_right
+            next = sand + down
+            if (next := sand + down) not in board:
+                sand = next
+            elif (next := sand + down_left) not in board:
+                sand = next
+            elif (next := sand + down_right) not in board:
+                sand = next
             else:
                 board[sand] = "O"
                 sand_count += 1
@@ -68,15 +69,16 @@ def part2():
             if (sand + down).y == max_row + 2:
                 break
             d = sand + down
-
-            if sand + down not in board:
-                sand += down
-            elif sand + down_left not in board:
-                sand += down_left
-            elif sand + down_right not in board:
-                sand += down_right
+            next = sand + down
+            if (next := sand + down) not in board:
+                sand = next
+            elif (next := sand + down_left) not in board:
+                sand = next
+            elif (next := sand + down_right) not in board:
+                sand = next
             else:
                 break
+
         board[sand] = "O"
         sand_count += 1
 
