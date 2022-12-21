@@ -5,19 +5,17 @@ Adapted from Peter Norvig's Advent of Code solutions.
 
 import time
 from collections import defaultdict, abc
-from dataclasses import dataclass, field
 from itertools import chain
 from typing import (
     Iterable,
     Mapping,
+    NamedTuple,
     Sequence,
     TypeVar,
     Callable,
     Generic,
     Optional,
     overload,
-    Any,
-    Type,
     ParamSpec,
 )
 import re
@@ -128,10 +126,9 @@ def answer(puzzle, correct, code: Callable):
     print(msg)
 
 
-@dataclass(frozen=True, slots=True)
-class Point:
-    x: int = field()
-    y: int = field()
+class Point(NamedTuple):
+    x: int
+    y: int
 
     def __add__(self, other: "Point") -> "Point":
         return Point(self.x + other.x, self.y + other.y)
