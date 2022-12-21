@@ -1,79 +1,53 @@
-from common import data, mapt
+from common import data, mapt, Grid, Point, answer
+from typing import Literal
 
 lines = data(
     14,
     sep="\n",
-    parser=lambda l: [mapt(int, part.split(",")) for part in l.split(" -> ")],
+    parser=lambda l: [Point(*mapt(int, part.split(","))) for part in l.split(" -> ")],
 )
-max_col = max(c for line in lines for (c, r) in line)
-max_row = max(r for line in lines for (c, r) in line)
-
-board = [["." for _ in range(max_col + 1)] for _ in range(max_row + 1)]
-
-for line in lines:
-    cursor = line[0]
-    for position in line[1:]:
-        cursor_c, cursor_r = cursor
-        position_c, position_r = position
-        c_diff = abs(cursor_c - position_c) + 1
-        r_diff = abs(cursor_r - position_r) + 1
-        c_start = min(cursor_c, position_c)
-        r_start = min(cursor_r, position_r)
-        for c in range(c_start, c_start + c_diff):
-            board[r_start][c] = "#"
-        for r in range(r_start, r_start + r_diff):
-            board[r][c_start] = "#"
-
-        cursor = position
+max_col = max(point.x for line in lines for point in line)
+max_row = max(point.y for line in lines for point in line)
 
 
-def print_board(board):
-    print("\n".join(" ".join(line) for line in board))
-
-
-def build_board():
-    board = [["." for _ in range(max_col + 200)] for _ in range((max_row + 2) + 1)]
-
+def build_board() -> Grid[Literal["#"] | Literal["O"]]:
+    board = Grid()
     for line in lines:
         cursor = line[0]
         for position in line[1:]:
-            cursor_c, cursor_r = cursor
-            position_c, position_r = position
-            c_diff = abs(cursor_c - position_c) + 1
-            r_diff = abs(cursor_r - position_r) + 1
-            c_start = min(cursor_c, position_c)
-            r_start = min(cursor_r, position_r)
-            for c in range(c_start, c_start + c_diff):
-                board[r_start][c] = "#"
-            for r in range(r_start, r_start + r_diff):
-                board[r][c_start] = "#"
+            diff = abs(cursor - position) + Point(1, 1)
+            x_start = min(cursor.x, position.x)
+            y_start = min(cursor.y, position.y)
+            for x in range(x_start, x_start + diff.x):
+                board[Point(x, y_start)] = "#"
+            for y in range(y_start, y_start + diff.y):
+                board[Point(x_start, y)] = "#"
 
             cursor = position
-
     return board
 
 
 def part1():
     board = build_board()
 
-    sand_drop = (500, 0)
+    sand_drop = Point(500, 0)
     sand_count = 0
+    down = Point(0, 1)
+    down_left = Point(-1, 1)
+    down_right = Point(1, 1)
     while True:
-        sand_c, sand_r = sand_drop
+        sand = sand_drop
         while True:
-            next_r = sand_r + 1
-            if sand_r > max_row:
+            if sand.y > max_row:
                 return sand_count
-            if board[next_r][sand_c] == ".":
-                sand_r = next_r
-            elif board[next_r][sand_c - 1] == ".":
-                sand_r = next_r
-                sand_c = sand_c - 1
-            elif board[next_r][sand_c + 1] == ".":
-                sand_r = next_r
-                sand_c = sand_c + 1
+            if sand + down not in board:
+                sand += down
+            elif sand + down_left not in board:
+                sand += down_left
+            elif sand + down_right not in board:
+                sand += down_right
             else:
-                board[sand_r][sand_c] = "O"
+                board[sand] = "O"
                 sand_count += 1
                 break
 
@@ -81,29 +55,31 @@ def part1():
 def part2():
     board = build_board()
 
-    sand_drop = (500, 0)
+    sand_drop = Point(500, 0)
     sand_count = 0
+    down = Point(0, 1)
+    down_left = Point(-1, 1)
+    down_right = Point(1, 1)
     while True:
-        sand_c, sand_r = sand_drop
-        if board[sand_r][sand_c] != ".":
-            return sand_count
+        sand = sand_drop
         while True:
-            next_r = sand_r + 1
-            if next_r == max_row + 2:
+            if sand in board:
+                return sand_count
+            if (sand + down).y == max_row + 2:
                 break
-            elif board[next_r][sand_c] == ".":
-                sand_r = next_r
-            elif board[next_r][sand_c - 1] == ".":
-                sand_r = next_r
-                sand_c = sand_c - 1
-            elif board[next_r][sand_c + 1] == ".":
-                sand_r = next_r
-                sand_c = sand_c + 1
+            d = sand + down
+
+            if sand + down not in board:
+                sand += down
+            elif sand + down_left not in board:
+                sand += down_left
+            elif sand + down_right not in board:
+                sand += down_right
             else:
                 break
-        board[sand_r][sand_c] = "O"
+        board[sand] = "O"
         sand_count += 1
 
 
-print(part1())
-print(part2())
+answer(14.1, 683, part1)
+answer(14.2, 28821, part2)

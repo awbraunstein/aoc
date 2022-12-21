@@ -3,13 +3,17 @@
 Adapted from Peter Norvig's Advent of Code solutions.
 """
 
-from collections import defaultdict
+import time
+from collections import defaultdict, abc
+from dataclasses import dataclass, field
 from itertools import chain
 from typing import (
     Iterable,
+    Mapping,
     Sequence,
     TypeVar,
     Callable,
+    Generic,
     Optional,
     overload,
     Any,
@@ -110,3 +114,99 @@ def mapt(fn: Callable[[K], T], iter: Iterable[K]) -> tuple[T, ...]:
 
 cat = "".join
 flatten = chain.from_iterable
+
+
+def answer(puzzle, correct, code: Callable):
+    start = time.perf_counter()
+    got = code()
+    secs = time.perf_counter() - start
+    msg = f"{secs:5.3f} seconds for " + (
+        f"correct answer: {got}"
+        if (got == correct)
+        else f"WRONG!! ANSWER: {got}; EXPECTED {correct}"
+    )
+    print(msg)
+
+
+@dataclass(frozen=True, slots=True)
+class Point:
+    x: int = field()
+    y: int = field()
+
+    def __add__(self, other: "Point") -> "Point":
+        return Point(self.x + other.x, self.y + other.y)
+
+    def __sub__(self, other: "Point") -> "Point":
+        return Point(self.x - other.x, self.y - other.y)
+
+    def __abs__(self) -> "Point":
+        return Point(abs(self.x), abs(self.y))
+
+
+def distance(p1: Point, p2: Point) -> float:
+    diff = p2 - p1
+    return (diff.x**2 + diff.y**2) ** 0.5
+
+
+def manhattan_distance(p1: Point, p2: Point) -> int:
+    diff = abs(p2 - p1)
+    return diff.x + diff.y
+
+
+Directions = tuple[Point, ...]
+
+directions4 = North, South, East, West = (
+    Point(0, 1),
+    Point(0, -1),
+    Point(1, 0),
+    Point(-1, 0),
+)
+directions8 = directions4 + (Point(-1, -1), Point(-1, 1), Point(1, -1), Point(1, 1))
+
+
+class Grid(Generic[T], dict[Point, T]):
+    def __init__(
+        self,
+        mapping_or_rows: Mapping[Point, T] | Iterable[Iterable[T]] = (),
+        directions: Directions = directions4,
+    ):
+        self.directions = directions
+        self.update(
+            mapping_or_rows  # type: ignore
+            if isinstance(mapping_or_rows, abc.Mapping)
+            else {
+                Point(x, y): v
+                for y, row in enumerate(mapping_or_rows)
+                for x, v in enumerate(row)
+            }
+        )
+
+    def copy(self) -> "Grid[T]":
+        return Grid(self, self.directions)
+
+    def neighbors(self, p: Point) -> list[Point]:
+        return [p + delta for delta in self.directions if p in self]
+
+    def to_rows(
+        self,
+        default: V | None = None,
+        xs: Sequence[int] | None = None,
+        ys: Sequence[int] | None = None,
+    ) -> list[list[T | V | None]]:
+        xs = xs or range(max(p.x for p in self) + 1)
+        ys = ys or range(max(p.y for p in self) + 1)
+        return [[self.get(Point(x, y), default) for x in xs] for y in ys]
+
+    def draw_picture(
+        self,
+        sep: str = "",
+        default: str = ".",
+        xs: Sequence[int] | None = None,
+        ys: Sequence[int] | None = None,
+    ) -> str:
+        return "\n".join(
+            [
+                sep.join(map(str, row))
+                for row in self.to_rows(default=default, xs=xs, ys=ys)
+            ]
+        )
