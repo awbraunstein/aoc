@@ -40,7 +40,6 @@ def part1():
         while True:
             if sand.y > max_row:
                 return sand_count
-            next = sand + down
             if (next := sand + down) not in board:
                 sand = next
             elif (next := sand + down_left) not in board:
@@ -68,8 +67,6 @@ def part2():
                 return sand_count
             if (sand + down).y == max_row + 2:
                 break
-            d = sand + down
-            next = sand + down
             if (next := sand + down) not in board:
                 sand = next
             elif (next := sand + down_left) not in board:
