@@ -114,7 +114,7 @@ cat = "".join
 flatten = chain.from_iterable
 
 
-def answer(puzzle, correct, code: Callable):
+def answer(puzzle: float, correct: T, code: Callable[[], T]) -> None:
     start = time.perf_counter()
     got = code()
     secs = time.perf_counter() - start
