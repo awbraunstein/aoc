@@ -1,8 +1,7 @@
-from common import data, mapt, Grid, Point, answer, ints, manhattan_distance, rest
-from typing import Literal
+from common import data, Point, answer, ints, manhattan_distance
 
 
-def parse_line(line: str) -> tuple[Point, Point]:
+def parse_line(line: str) -> tuple[Point, Point, int]:
     nums = ints(line)
     assert len(nums) == 4
     sensor = Point(nums[0], nums[1])
@@ -64,7 +63,7 @@ def part1() -> int:
     return count
 
 
-def part2():
+def part2() -> int:
     max_xy = 4000000
     total_spots = max_xy + 1
     for i in range(max_xy + 1):
@@ -78,6 +77,7 @@ def part2():
 
             assert len(ranges) == 2
             return ((ranges[0][1] + 1) * 4000000) + i
+    raise Exception
 
 
 answer(15.1, 6124805, part1)
